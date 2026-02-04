@@ -9,14 +9,28 @@ const app=document.getElementById("app");
 let me="",to="";
 
 async function login(){
- const r=await fetch("/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({username:u.value,password:p.value})});
- const d=await r.json();
+ const r=await fetch("/login",{
+  method:"POST",
+  headers:{"Content-Type":"application/json"},
+  body:JSON.stringify({username:u.value,password:p.value})
+ });
+
+ const t = await r.text();
+
+ if(t==="bad"){
+  alert("Wrong login");
+  return;
+ }
+
+ const d = JSON.parse(t);
+
  me=d.username;
  loginDiv.hidden=true;
  app.hidden=false;
  socket.emit("online",me);
  loadUsers();
 }
+
 
 async function reg(){
  await fetch("/register",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({username:u.value,password:p.value})});
