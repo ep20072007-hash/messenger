@@ -1,29 +1,91 @@
 <!DOCTYPE html>
 <html>
+<head>
+<meta charset="UTF-8">
+<title>Messenger</title>
+
+<script src="/socket.io/socket.io.js"></script>
+
+<style>
+body{
+margin:0;
+background:#111;
+color:white;
+font-family:Arial;
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;
+}
+
+#login,#chat{
+width:300px;
+}
+
+input,button{
+width:100%;
+padding:10px;
+margin:5px 0;
+border:none;
+border-radius:5px;
+}
+
+button{
+background:#4caf50;
+color:white;
+cursor:pointer;
+}
+
+#messages{
+height:300px;
+overflow:auto;
+border:1px solid #444;
+padding:5px;
+}
+</style>
+</head>
+
 <body>
 
-<input id="u" placeholder="login">
-<input id="p" placeholder="password" type="password">
-<button onclick="go()">Enter</button>
+<div id="login">
+<h2>Login</h2>
+<input id="username" placeholder="Username">
+<button onclick="enter()">Enter</button>
+</div>
 
-<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+<div id="chat" style="display:none">
+<h3 id="me"></h3>
+<div id="messages"></div>
+<input id="text" placeholder="Message">
+<button onclick="send()">Send</button>
+</div>
 
 <script>
-async function go(){
-  const r = await fetch("/login",{
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({
-      username:u.value,
-      password:p.value
-    })
+
+const socket = io();
+let user = "";
+
+function enter(){
+  user = username.value;
+  if(!user) return alert("name");
+
+  login.style.display="none";
+  chat.style.display="block";
+  me.innerText="You: "+user;
+}
+
+function send(){
+  if(!text.value) return;
+
+  socket.emit("send",{
+    from:user,
+    to:"all",
+    text:text.value
   });
 
-  const d = await r.json();
-  localStorage.user = d.username;
-  location = "users.html";
+  text.value="";
 }
-</script>
 
-</body>
-</html>
+socket.on("message",m=>{
+  messages.innerHTML += `<div><b>${m.from}:</b> ${m.text}</div>`;
+  messa
