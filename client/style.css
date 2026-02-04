@@ -1,76 +1,24 @@
-body{
-margin:0;
-background:#0e0f13;
-color:white;
-font-family:Arial;
-}
-
-#login{
-width:300px;
-margin:150px auto;
-display:flex;
-flex-direction:column;
-gap:10px;
-}
-
-input,button{
-padding:10px;
-border:none;
-border-radius:6px;
-}
-
+body{margin:0;background:#0e0f13;color:white;font-family:Arial}
+input,button{padding:10px;border:none;border-radius:6px}
 button{background:#2b5278;color:white}
 
-.vk{
-display:flex;
-height:100vh;
-}
+#login{width:300px;margin:150px auto;display:flex;flex-direction:column;gap:10px}
 
-.left{
-width:260px;
-background:#181b22;
-padding:10px;
-overflow:auto;
-}
+.vk{display:flex;height:100vh}
+.left{width:260px;background:#181b22;padding:10px}
+.center{flex:1;display:flex;flex-direction:column}
 
-.profile{
-font-weight:bold;
-margin-bottom:10px;
-}
+.chat-header{padding:12px;background:#1c1f26}
 
-.center{
-flex:1;
-display:flex;
-flex-direction:column;
-}
+#messages{flex:1;padding:15px;overflow:auto}
 
-.chat-header{
-padding:12px;
-background:#1c1f26;
-border-bottom:1px solid #222;
-}
-
-#messages{
-flex:1;
-padding:15px;
-overflow:auto;
-}
-
-.msg{
-margin:6px 0;
-}
-
+.msg{margin:6px}
 .me{text-align:right}
 
-.send{
-display:flex;
-gap:5px;
-padding:10px;
-background:#181b22;
-}
+.send{display:flex;gap:5px;background:#181b22;padding:10px}
 
-.user{
-padding:6px;
-border-bottom:1px solid #222;
-cursor:pointer;
-}
+.user{padding:6px;border-bottom:1px solid #222;cursor:pointer}
+
+.vk-menu{display:flex;flex-direction:column;margin-bottom:10px}
+.vk-item{padding:8px;border-radius:6px}
+.vk-item.active{background:#2b5278}
