@@ -1,16 +1,14 @@
 const title=document.getElementById("title");
 const error=document.getElementById("error");
 
-let stage=0;
 let exists=false;
+let stage=0;
 
 const token=localStorage.getItem("token");
 
 if(token){
  fetch("/auth/me",{headers:{Authorization:"Bearer "+token}})
- .then(r=>{
-  if(r.ok) location.reload();
- });
+ .then(r=>{if(r.ok)location.reload();});
 }
 
 async function next(){
@@ -18,13 +16,22 @@ async function next(){
  error.innerText="";
 
  if(stage===0){
-  const r=await fetch("/auth/check",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({username:u.value})});
+
+  const r=await fetch("/auth/check",{
+   method:"POST",
+   headers:{"Content-Type":"application/json"},
+   body:JSON.stringify({username:u.value})
+  });
+
   const d=await r.json();
+
   exists=d.exists;
 
   title.innerText=exists?"Enter password":"Create password";
+
   p.hidden=false;
   if(!exists) c.hidden=false;
+
   stage=1;
   return;
  }
@@ -41,7 +48,10 @@ async function next(){
   const r=await fetch(url,{
    method:"POST",
    headers:{"Content-Type":"application/json"},
-   body:JSON.stringify({username:u.value,password:p.value})
+   body:JSON.stringify({
+    username:u.value,
+    password:p.value
+   })
   });
 
   const d=await r.json();
