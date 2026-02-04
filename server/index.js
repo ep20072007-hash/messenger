@@ -1,27 +1,27 @@
+require("dotenv").config();
+
 const express=require("express");
-const mongoose=require("mongoose");
-const bcrypt=require("bcrypt");
-const jwt=require("jsonwebtoken");
+const http=require("http");
 const cors=require("cors");
-const path=require("path");
+const mongoose=require("mongoose");
+const jwt=require("jsonwebtoken");
+const bcrypt=require("bcryptjs");
+const {Server}=require("socket.io");
 
 const User=require("./models/User");
-
-mongoose.connect(process.env.MONGO_URL)
-.then(()=>console.log("Mongo connected"))
-.catch(e=>console.error(e));
+const Message=require("./models/Message");
 
 const app=express();
+const server=http.createServer(app);
+const io=new Server(server);
 
 app.use(cors());
 app.use(express.json());
-app.use(express.static(path.join(__dirname,"../client")));
+app.use(express.static("client"));
 
-const SECRET="telegram_clone_secret";
+mongoose.connect(process.env.MONGO_URL);
 
-function sign(u){
- return jwt.sign({username:u.username},SECRET,{expiresIn:"7d"});
-}
+const SECRET="vk_dark_secret";
 
 // ===== AUTH =====
 
@@ -31,63 +31,93 @@ app.post("/auth/check",async(req,res)=>{
 });
 
 app.post("/auth/register",async(req,res)=>{
- const {username,password}=req.body;
 
- if(await User.findOne({username}))
-  return res.json({error:"Username taken"});
+ const hash=await bcrypt.hash(req.body.password,10);
 
- const hash=await bcrypt.hash(password,10);
- const u=await User.create({username,password:hash});
+ const user=await User.create({
+  username:req.body.username,
+  password:hash,
+  friends:[],
+  requests:[]
+ });
 
- res.json({token:sign(u),profile:u});
+ const token=jwt.sign({username:user.username},SECRET);
+
+ res.json({token,profile:user});
 });
 
 app.post("/auth/login",async(req,res)=>{
- const {username,password}=req.body;
 
- const u=await User.findOne({username});
- if(!u) return res.json({error:"User not found"});
+ const user=await User.findOne({username:req.body.username});
+ if(!user)return res.json({error:"Пользователь не найден"});
 
- if(!await bcrypt.compare(password,u.password))
-  return res.json({error:"Wrong password"});
+ const ok=await bcrypt.compare(req.body.password,user.password);
+ if(!ok)return res.json({error:"Неверный пароль"});
 
- res.json({token:sign(u),profile:u});
+ const token=jwt.sign({username:user.username},SECRET);
+
+ res.json({token,profile:user});
 });
 
 app.get("/profile",async(req,res)=>{
- try{
-  const d=jwt.verify(req.headers.authorization.split(" ")[1],SECRET);
-  const u=await User.findOne({username:d.username});
-  res.json(u);
- }catch{
-  res.sendStatus(401);
- }
+ const t=req.headers.authorization.split(" ")[1];
+ const d=jwt.verify(t,SECRET);
+ const u=await User.findOne({username:d.username});
+ res.json(u);
 });
 
 // ===== FRIENDS =====
 
-app.get("/search/:name",async(req,res)=>{
- res.json(await User.find({username:new RegExp(req.params.name,"i")},"username"));
+app.get("/search/:q",async(req,res)=>{
+ res.json(await User.find({username:new RegExp(req.params.q,"i")},"username"));
 });
 
 app.post("/friend/request",async(req,res)=>{
  await User.updateOne({username:req.body.to},{$addToSet:{requests:req.body.from}});
- res.json({status:"ok"});
+ res.json({ok:true});
 });
 
 app.post("/friend/accept",async(req,res)=>{
- const {me,user}=req.body;
 
- await User.updateOne({username:me},{$pull:{requests:user},$addToSet:{friends:user}});
- await User.updateOne({username:user},{$addToSet:{friends:me}});
+ await User.updateOne({username:req.body.me},{
+  $pull:{requests:req.body.user},
+  $addToSet:{friends:req.body.user}
+ });
 
- res.json({status:"ok"});
+ await User.updateOne({username:req.body.user},{
+  $addToSet:{friends:req.body.me}
+ });
+
+ res.json({ok:true});
 });
 
-app.get("/friends/:me",async(req,res)=>{
- const u=await User.findOne({username:req.params.me});
- res.json({friends:u.friends||[],requests:u.requests||[]});
+app.get("/friends/:u",async(req,res)=>{
+ const u=await User.findOne({username:req.params.u});
+ res.json(u);
 });
 
-const PORT=process.env.PORT||10000;
-app.listen(PORT,()=>console.log("SERVER",PORT));
+// ===== MESSAGES =====
+
+app.get("/messages/:a/:b",async(req,res)=>{
+
+ const chat=[req.params.a,req.params.b].sort().join("_");
+
+ res.json(await Message.find({chat}).sort("time"));
+});
+
+// SOCKET
+
+io.on("connection",socket=>{
+
+ socket.on("send",async m=>{
+
+  m.chat=[m.from,m.to].sort().join("_");
+
+  await Message.create(m);
+
+  io.emit("message",m);
+ });
+
+});
+
+server.listen(process.env.PORT||10000);

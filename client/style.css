@@ -1,71 +1,54 @@
 body{
 margin:0;
-background:#121212;
-font-family:Arial;
+background:#0b1218;
 color:white;
-height:100vh;
-display:flex;
-justify-content:center;
-align-items:center;
+font-family:Arial;
 }
 
 input,button{
-padding:12px;
+padding:10px;
 border:none;
 border-radius:6px;
-font-size:14px;
 }
 
-button{
-background:#2d2d2d;
-color:white;
-cursor:pointer;
-}
-
-button:hover{
-background:#444;
-}
+button{background:#2b5278;color:white}
 
 #auth{
-width:320px;
+width:300px;
+margin:120px auto;
 display:flex;
 flex-direction:column;
 gap:10px;
 }
 
-#error{
-color:#ff6666;
-font-size:13px;
-}
+.panel{display:flex;height:100vh}
 
-.panel{
-width:100%;
-height:100vh;
-display:flex;
-}
-
-.sidebar{
+.left{
 width:260px;
-background:#1a1a1a;
-padding:15px;
+background:#17212b;
+padding:10px;
 }
 
-.main{
+.chat{
 flex:1;
-padding:20px;
-}
-
-.section{
-margin-top:20px;
-}
-
-.user{
-padding:6px 0;
 display:flex;
-justify-content:space-between;
+flex-direction:column;
 }
 
-.small{
-font-size:13px;
-opacity:.7;
+.user{padding:6px;border-bottom:1px solid #222;cursor:pointer}
+
+.messages{
+flex:1;
+padding:15px;
+overflow:auto;
+}
+
+.msg{margin:6px 0}
+.me{text-align:right}
+
+.send{
+display:flex;
+gap:5px;
+padding:10px;
+background:#17212b;
 }

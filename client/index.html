@@ -9,9 +9,9 @@
 <body>
 
 <div id="auth">
-<h2 id="title">Введите имя пользователя</h2>
+<h2 id="title">Введите имя</h2>
 
-<input id="u" placeholder="Имя пользователя">
+<input id="u" placeholder="Имя">
 <input id="p" type="password" placeholder="Пароль" hidden>
 <input id="c" type="password" placeholder="Повторите пароль" hidden>
 
@@ -20,6 +20,7 @@
 <button onclick="next()">Продолжить</button>
 </div>
 
+<script src="/socket.io/socket.io.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

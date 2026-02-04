@@ -1,204 +1,107 @@
-const auth=document.getElementById("auth");
-const title=document.getElementById("title");
-const error=document.getElementById("error");
+const socket=io();
+
+let me=null;
+let current=null;
 
 const u=document.getElementById("u");
 const p=document.getElementById("p");
 const c=document.getElementById("c");
+const error=document.getElementById("error");
+const title=document.getElementById("title");
 
-let stage=0;
-let exists=false;
-let currentUser=null;
-
-// AUTO LOGIN
-const token=localStorage.getItem("token");
-
-if(token){
- fetch("/profile",{headers:{Authorization:"Bearer "+token}})
- .then(r=>r.json())
- .then(profile=>{
-  currentUser=profile.username;
-  renderPanel(profile);
- })
- .catch(()=>localStorage.clear());
-}
+let stage=0,exists=false;
 
 async function next(){
 
- error.innerText="";
-
  if(stage===0){
 
-  const r=await fetch("/auth/check",{
-   method:"POST",
-   headers:{"Content-Type":"application/json"},
-   body:JSON.stringify({username:u.value})
-  });
-
-  const d=await r.json();
-
-  exists=d.exists;
+  const r=await fetch("/auth/check",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({username:u.value})});
+  exists=(await r.json()).exists;
 
   title.innerText=exists?"Введите пароль":"Создайте пароль";
-
   p.hidden=false;
   if(!exists)c.hidden=false;
-
   stage=1;
-  return;
- }
-
- if(!exists && p.value!==c.value){
-  error.innerText="Пароли не совпадают";
   return;
  }
 
  const url=exists?"/auth/login":"/auth/register";
 
- const r=await fetch(url,{
-  method:"POST",
-  headers:{"Content-Type":"application/json"},
-  body:JSON.stringify({username:u.value,password:p.value})
- });
-
+ const r=await fetch(url,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({username:u.value,password:p.value})});
  const d=await r.json();
 
- if(d.error){
-  error.innerText=d.error;
-  return;
- }
+ if(d.error){error.innerText=d.error;return;}
 
- localStorage.setItem("token",d.token);
- currentUser=d.profile.username;
+ me=d.profile.username;
 
- renderPanel(d.profile);
+ render(d.profile);
 }
 
-// ================= UI =================
-
-function renderPanel(profile){
+function render(profile){
 
  document.body.innerHTML=`
  <div class="panel">
 
-  <div class="sidebar">
-   <h3>${profile.username}</h3>
-   <div class="small">Профиль</div>
+ <div class="left" id="friends"></div>
 
-   <div class="section">
-    <input id="search" placeholder="Поиск людей">
-    <button onclick="find()">Найти</button>
-   </div>
-
-   <div class="section">
-    <b>Результаты</b>
-    <div id="results"></div>
-   </div>
-
-   <div class="section">
-    <b>Заявки</b>
-    <div id="requests"></div>
-   </div>
-
-   <div class="section">
-    <b>Друзья</b>
-    <div id="friends"></div>
-   </div>
-
-   <div class="section">
-    <button onclick="logout()">Выйти</button>
-   </div>
-
+ <div class="chat">
+  <div class="messages" id="messages"></div>
+  <div class="send">
+   <input id="text" style="flex:1">
+   <button onclick="send()">➤</button>
   </div>
-
-  <div class="main">
-   <h2>Добро пожаловать</h2>
-   <p class="small">Социальная панель (VK dark style)</p>
-  </div>
+ </div>
 
  </div>
  `;
 
- loadFriends();
+ loadFriends(profile.username);
 }
 
-function logout(){
- localStorage.clear();
- location.reload();
-}
+async function loadFriends(u){
 
-// ================= FRIENDS =================
-
-async function find(){
-
- const v=document.getElementById("search").value;
- const r=await fetch("/search/"+v);
- const d=await r.json();
-
- const res=document.getElementById("results");
- res.innerHTML="";
-
- d.forEach(x=>{
-  if(x.username!==currentUser){
-   res.innerHTML+=`
-    <div class="user">
-     ${x.username}
-     <button onclick="addFriend('${x.username}')">Добавить</button>
-    </div>
-   `;
-  }
- });
-}
-
-async function addFriend(user){
-
- await fetch("/friend/request",{
-  method:"POST",
-  headers:{"Content-Type":"application/json"},
-  body:JSON.stringify({
-   from:currentUser,
-   to:user
-  })
- });
-
- loadFriends();
-}
-
-async function loadFriends(){
-
- const r=await fetch("/friends/"+currentUser);
+ const r=await fetch("/friends/"+u);
  const d=await r.json();
 
  const f=document.getElementById("friends");
- const req=document.getElementById("requests");
-
  f.innerHTML="";
- req.innerHTML="";
 
  d.friends.forEach(x=>{
-  f.innerHTML+=`<div class="user">${x}</div>`;
- });
-
- d.requests.forEach(x=>{
-  req.innerHTML+=`
-   <div class="user">
-    ${x}
-    <button onclick="accept('${x}')">Принять</button>
-   </div>
-  `;
+  const div=document.createElement("div");
+  div.className="user";
+  div.innerText=x;
+  div.onclick=()=>openChat(x);
+  f.appendChild(div);
  });
 }
 
-async function accept(user){
+async function openChat(u){
 
- await fetch("/friend/accept",{
-  method:"POST",
-  headers:{"Content-Type":"application/json"},
-  body:JSON.stringify({
-   me:currentUser,
-   user
-  })
- });
-
- loadFriends();
+ current=u;
+ loadChat();
 }
+
+async function loadChat(){
+
+ const r=await fetch("/messages/"+me+"/"+current);
+ const d=await r.json();
+
+ const m=document.getElementById("messages");
+ m.innerHTML="";
+
+ d.forEach(x=>{
+  m.innerHTML+=`<div class="msg ${x.from===me?"me":""}">${x.text}</div>`;
+ });
+}
+
+function send(){
+
+ socket.emit("send",{from:me,to:current,text:text.value});
+ text.value="";
+}
+
+socket.on("message",m=>{
+ if([m.from,m.to].includes(me)&&[m.from,m.to].includes(current)){
+  loadChat();
+ }
+});
