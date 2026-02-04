@@ -3,30 +3,46 @@
 <head>
 <meta charset="UTF-8">
 <title>Messenger</title>
-<link rel="stylesheet" href="style.css">
+<style>
+body{
+margin:0;
+background:#0e1621;
+font-family:Arial;
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;
+color:white;
+}
+#login{
+width:320px;
+display:flex;
+flex-direction:column;
+gap:12px;
+}
+input,button{
+padding:14px;
+border:none;
+border-radius:8px;
+font-size:15px;
+}
+button{
+background:#2aabee;
+color:white;
+cursor:pointer;
+}
+</style>
 </head>
+
 <body>
 
 <div id="login">
 <input id="u" placeholder="Username">
 <input id="p" type="password" placeholder="Password">
-<button type="button" onclick="login()">Login</button>
-<button type="button" onclick="reg()">Register</button>
-
+<button onclick="auth()">Continue</button>
 </div>
 
-<div id="app" hidden>
-<div id="users"></div>
-<div id="chat">
-<div id="messages"></div>
-<div id="send">
-<input id="text" placeholder="Message...">
-<button onclick="send()">➤</button>
-</div>
-</div>
-</div>
-
-<script src="/socket.io/socket.io.js"></script>
 <script src="app.js"></script>
+
 </body>
 </html>

@@ -1,78 +1,40 @@
-console.log("APP LOADED");
-const socket=io();
+let token=localStorage.getItem("token");
+let me=localStorage.getItem("username");
 
-const usersDiv=document.getElementById("users");
-const messages=document.getElementById("messages");
-const text=document.getElementById("text");
-const loginDiv=document.getElementById("login");
-const app=document.getElementById("app");
-
-let me="",to="";
-
-async function login(){
- const r=await fetch("/login",{
-  method:"POST",
-  headers:{"Content-Type":"application/json"},
-  body:JSON.stringify({username:u.value,password:p.value})
- });
-
- const t = await r.text();
-
- if(t==="bad"){
-  alert("Wrong login");
-  return;
- }
-
- const d = JSON.parse(t);
-
- me=d.username;
- loginDiv.hidden=true;
- app.hidden=false;
- socket.emit("online",me);
- loadUsers();
-}
-
-
-async function reg(){
- await fetch("/register",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({username:u.value,password:p.value})});
- alert("registered");
-}
-
-async function loadUsers(){
- const u=await fetch("/users").then(r=>r.json());
- usersDiv.innerHTML="";
- u.forEach(x=>{
-  if(x.username!=me){
-   let d=document.createElement("div");
-   d.className="user";
-   d.innerText=x.username+(x.online?" ●":"");
-   d.onclick=()=>{to=x.username;load()};
-   usersDiv.appendChild(d);
+if(token){
+ fetch("/me",{headers:{Authorization:"Bearer "+token}})
+ .then(r=>{
+  if(r.ok){
+   alert("Auto login as "+me);
+  }else{
+   localStorage.clear();
   }
  });
 }
 
-async function load(){
- messages.innerHTML="";
- const chat=[me,to].sort().join("_");
- const m=await fetch("/messages/"+chat).then(r=>r.json());
- m.forEach(draw);
-}
+async function auth(){
 
-function draw(x){
- let d=document.createElement("div");
- d.className="msg"+(x.from==me?" me":"");
- d.innerText=x.text;
- messages.appendChild(d);
- messages.scrollTop=999999;
-}
+ const r=await fetch("/auth/start",{
+  method:"POST",
+  headers:{"Content-Type":"application/json"},
+  body:JSON.stringify({
+   username:u.value,
+   password:p.value
+  })
+ });
 
-function send(){
- if(!to)return;
- socket.emit("send",{from:me,to,text:text.value});
- text.value="";
-}
+ const d=await r.json();
 
-socket.on("message",m=>{
- if([m.from,m.to].includes(me)) draw(m);
-});
+ if(d.status==="bad"){
+  alert("Wrong password");
+  return;
+ }
+
+ token=d.token;
+ me=d.username;
+
+ localStorage.setItem("token",token);
+ localStorage.setItem("username",me);
+
+ alert("Logged in as "+me);
+}
