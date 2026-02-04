@@ -18,7 +18,14 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, "../client")));
 
 // 👉 MongoDB
-mongoose.connect("mongodb+srv://ep20072007_db_user:UtYi8bCqJn1zQ4am@cluster0.xu1dyy.mongodb.net/messenger");
+mongoose.connect(
+  "mongodb+srv://ep20072007_db_user:123321qaz_@cluster0.xxuldyy.mongodb.net/?appName=Cluster0",
+  {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+  }
+);
+
 
 // ===== MODELS =====
 
