@@ -1,100 +1,102 @@
 const socket=io();
-
 let me=null,current=null;
 
 async function login(){
+
  const r=await fetch("/auth/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({username:user.value,password:pass.value})});
  const d=await r.json();
- if(d.error)return err.innerText=d.error;
- init(d.profile);
+
+ if(d.error)return alert(d.error);
+
+ me=d.profile.username;
+
+ login.hidden=true;
+ app.hidden=false;
+
+ route("chat");
 }
 
 async function register(){
+
  const r=await fetch("/auth/register",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({username:user.value,password:pass.value})});
  const d=await r.json();
- init(d.profile);
-}
 
-function init(p){
- me=p.username;
+ me=d.profile.username;
+
  login.hidden=true;
  app.hidden=false;
- document.getElementById("me").innerText=me;
- loadFriends();
+
+ route("chat");
 }
 
-async function loadFriends(){
+function logout(){
+ location.reload();
+}
+
+function showProfile(){
+ view.innerHTML=`<h2>${me}</h2><p>SB Messenger Profile</p>`;
+}
+
+async function showFriends(){
+
  const r=await fetch("/friends/"+me);
  const d=await r.json();
- friends.innerHTML="";
- requests.innerHTML="";
+
+ let h="<h2>Друзья</h2>";
+
  d.friends.forEach(u=>{
-  const div=document.createElement("div");
-  div.className="user";
-  div.innerText=u;
-  div.onclick=()=>openChat(u);
-  friends.appendChild(div);
+  h+=`<div onclick="openChat('${u}')">${u}</div>`;
  });
+
+ h+="<h3>Заявки</h3>";
+
  d.requests.forEach(u=>{
-  const div=document.createElement("div");
-  div.className="user";
-  div.innerText="✓ "+u;
-  div.onclick=()=>accept(u);
-  requests.appendChild(div);
+  h+=`<div onclick="accept('${u}')">${u}</div>`;
  });
+
+ view.innerHTML=h;
 }
 
 async function accept(u){
  await fetch("/friend/accept",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({me,user:u})});
- loadFriends();
+ showFriends();
 }
 
-search.oninput=async()=>{
- if(!search.value)return results.innerHTML="";
- const r=await fetch("/search/"+search.value);
- const d=await r.json();
- results.innerHTML="";
- d.forEach(u=>{
-  const div=document.createElement("div");
-  div.className="user";
-  div.innerText="+ "+u.username;
-  div.onclick=()=>add(u.username);
-  results.appendChild(div);
- });
-}
+function showChat(){
 
-async function add(u){
- await fetch("/friend/request",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({from:me,to:u})});
+ view.innerHTML=`
+ <div id="chatHeader"></div>
+ <div id="messages"></div>
+ <input id="text">
+ <button onclick="send()">➤</button>
+ `;
 }
 
 async function openChat(u){
+
  current=u;
- chatName.innerText=u;
+ chatHeader.innerText=u;
+
  const r=await fetch("/messages/"+me+"/"+u);
  const d=await r.json();
+
  messages.innerHTML="";
+
  d.forEach(m=>{
-  messages.innerHTML+=`<div class="msg ${m.from===me?"me":""}">${m.text||""}${m.image?`<br><img src="${m.image}" width="200">`:""}</div>`;
+  messages.innerHTML+=`<div>${m.text||""}</div>`;
  });
 }
 
-async function send(){
+function send(){
+
  if(!current)return;
- if(file.files[0]){
-  const fd=new FormData();
-  fd.append("file",file.files[0]);
-  const r=await fetch("/upload",{method:"POST",body:fd});
-  const d=await r.json();
-  socket.emit("send",{from:me,to:current,image:d.url});
-  file.value="";
-  return;
- }
+
  socket.emit("send",{from:me,to:current,text:text.value});
  text.value="";
 }
 
 document.addEventListener("keydown",e=>{
- if(e.key==="Enter" && document.activeElement.id==="text")send();
+ if(e.key==="Enter" && text)send();
 });
 
 socket.on("message",m=>{

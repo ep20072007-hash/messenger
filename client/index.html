@@ -2,65 +2,40 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<title>Messenger</title>
+<title>SB Messenger</title>
 <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
 <div id="login">
-<h2>Вход</h2>
+<h2>SB Messenger</h2>
 <input id="user" placeholder="Имя">
-<input id="pass" type="password" placeholder="Пароль">
+<input id="pass" type="password">
 <button onclick="login()">Войти</button>
 <button onclick="register()">Регистрация</button>
-<div id="err"></div>
 </div>
 
 <div id="app" hidden>
 
-<div class="vk">
+<div class="sidebar">
 
-<div class="left">
+<div class="brand">SB</div>
 
-<div class="vk-menu">
-<div class="vk-item active">💬 Мессенджер</div>
-<div class="vk-item">👥 Друзья</div>
-</div>
-
-<div id="me"></div>
-
-<input id="search" placeholder="Поиск">
-
-<div id="results"></div>
-
-<h4>Друзья</h4>
-<div id="friends"></div>
-
-<h4>Заявки</h4>
-<div id="requests"></div>
+<div class="nav" onclick="route('profile')">Профиль</div>
+<div class="nav" onclick="route('chat')">Мессенджер</div>
+<div class="nav" onclick="route('friends')">Друзья</div>
+<div class="nav" onclick="logout()">Выход</div>
 
 </div>
 
-<div class="center">
-
-<div class="chat-header" id="chatName">Выберите диалог</div>
-
-<div id="messages"></div>
-
-<div class="send">
-<input type="file" id="file">
-<input id="text">
-<button onclick="send()">➤</button>
-</div>
-
-</div>
-
-</div>
+<div id="view"></div>
 
 </div>
 
 <script src="/socket.io/socket.io.js"></script>
+<script src="router.js"></script>
 <script src="app.js"></script>
+
 </body>
 </html>
