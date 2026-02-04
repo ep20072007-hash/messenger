@@ -1,18 +1,29 @@
 body{
 margin:0;
-background:#0f0f0f;
+background:#0e1621;
 color:white;
-font-family:sans-serif;
+font-family:Arial;
+height:100vh;
 }
 
 #login{
-text-align:center;
-margin-top:200px;
+display:flex;
+flex-direction:column;
+width:200px;
+margin:200px auto;
+gap:10px;
 }
 
 input,button{
 padding:10px;
-margin:5px;
+border:none;
+border-radius:6px;
+}
+
+button{
+background:#2ea6ff;
+color:white;
+cursor:pointer;
 }
 
 #app{
@@ -21,9 +32,18 @@ height:100vh;
 }
 
 #users{
-width:200px;
-border-right:1px solid #333;
+width:250px;
+background:#17212b;
 padding:10px;
+}
+
+.user{
+padding:10px;
+cursor:pointer;
+}
+
+.user:hover{
+background:#1f2c3a;
 }
 
 #chat{
@@ -34,6 +54,25 @@ flex-direction:column;
 
 #messages{
 flex:1;
+padding:20px;
 overflow:auto;
+}
+
+.msg{
+background:#182533;
 padding:10px;
+border-radius:10px;
+margin:5px;
+max-width:60%;
+}
+
+.me{
+background:#2b5278;
+margin-left:auto;
+}
+
+#send{
+display:flex;
+padding:10px;
+background:#17212b;
 }

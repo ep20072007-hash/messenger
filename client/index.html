@@ -5,14 +5,13 @@
 <title>Messenger</title>
 <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
 
 <div id="login">
-<h2>Login / Register</h2>
-<input id="user" placeholder="username">
-<input id="pass" placeholder="password" type="password">
-<button onclick="auth()">Enter</button>
+<input id="u" placeholder="Username">
+<input id="p" placeholder="Password">
+<button onclick="login()">Login</button>
+<button onclick="reg()">Register</button>
 </div>
 
 <div id="app" hidden>
@@ -21,14 +20,15 @@
 
 <div id="chat">
 <div id="messages"></div>
+<div id="send">
 <input id="text">
-<button onclick="send()">Send</button>
+<button onclick="send()">➤</button>
+</div>
 </div>
 
 </div>
 
 <script src="/socket.io/socket.io.js"></script>
 <script src="app.js"></script>
-
 </body>
 </html>

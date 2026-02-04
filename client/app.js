@@ -1,69 +1,54 @@
-const socket = io();
+const socket=io();
 
-let me = "";
-let current = "";
+let me="",to="";
 
-async function auth(){
-me = user.value;
-const password = pass.value;
-
-let r = await fetch("/login",{
-method:"POST",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify({username:me,password})
-});
-
-let u = await r.json();
-
-if(!u){
-await fetch("/register",{
-method:"POST",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify({username:me,password})
-});
+async function login(){
+me=u.value;
+let r=await fetch("/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({username:u.value,password:p.value})});
+if(await r.text()=="ok") start();
 }
 
+async function reg(){
+await fetch("/register",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({username:u.value,password:p.value})});
+alert("registered");
+}
+
+function start(){
 login.hidden=true;
 app.hidden=false;
-
 loadUsers();
 }
 
 async function loadUsers(){
-let r = await fetch("/users");
-let users = await r.json();
-
-users.forEach(u=>{
-if(u.username!=me){
+let users=await fetch("/users").then(r=>r.json());
+users.forEach(x=>{
+if(x.username!==me){
 let d=document.createElement("div");
-d.innerText=u.username;
-d.onclick=()=>open(u.username);
-usersDiv.append(d);
+d.className="user";
+d.innerText=x.username;
+d.onclick=()=>{to=x.username;load()};
+usersDiv.appendChild(d);
 }
 });
 }
 
-async function open(u){
-current=u;
+async function load(){
+let chat=[me,to].sort().join("-");
+let m=await fetch("/messages/"+chat).then(r=>r.json());
 messages.innerHTML="";
-
-let r=await fetch(`/chat/${me}/${u}`);
-let msgs=await r.json();
-
-msgs.forEach(show);
+m.forEach(x=>{
+let d=document.createElement("div");
+d.className="msg"+(x.from==me?" me":"");
+d.innerText=x.text;
+messages.appendChild(d);
+});
 }
 
 function send(){
-socket.emit("send",{from:me,to:current,text:text.value});
+socket.emit("send",{from:me,to,text:text.value});
 text.value="";
 }
 
-socket.on("msg",m=>{
-if(m.from==current||m.to==current) show(m);
+socket.on("message",m=>{
+if([m.from,m.to].includes(me)) load();
 });
-
-function show(m){
-let d=document.createElement("div");
-d.innerText=m.from+": "+m.text;
-messages.append(d);
-}

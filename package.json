@@ -1,15 +1,50 @@
-{
-  "name": "messenger",
-  "version": "1.0.0",
-  "private": true,
-  "main": "server/index.js",
-  "scripts": {
-    "start": "node server/index.js"
-  },
-  "dependencies": {
-    "cors": "^2.8.5",
-    "express": "^4.19.2",
-    "mongoose": "^8.1.1",
-    "socket.io": "^4.7.4"
-  }
+const socket = io();
+
+let me = prompt("Your name?");
+let to = "";
+
+fetch("/users")
+.then(r=>r.json())
+.then(users=>{
+users.forEach(u=>{
+if(u.username!==me){
+let d=document.createElement("div");
+d.className="user";
+d.innerText=u.username;
+d.onclick=()=>{
+to=u.username;
+load();
+};
+usersDiv.appendChild(d);
 }
+});
+});
+
+const usersDiv=document.getElementById("users");
+const messages=document.getElementById("messages");
+
+function load(){
+fetch("/messages/"+[me,to].sort().join("-"))
+.then(r=>r.json())
+.then(data=>{
+messages.innerHTML="";
+data.forEach(m=>{
+let d=document.createElement("div");
+d.className="msg"+(m.from===me?" me":"");
+d.innerText=m.text;
+messages.appendChild(d);
+});
+});
+}
+
+function send(){
+let text=document.getElementById("text").value;
+socket.emit("send",{from:me,to,text});
+document.getElementById("text").value="";
+}
+
+socket.on("connect",()=>{});
+
+socket.on("message",m=>{
+if([m.from,m.to].includes(me)) load();
+});
