@@ -5,15 +5,19 @@
 <title>Messenger</title>
 <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
 <div id="auth">
-<h2 id="title">Enter username</h2>
-<input id="u" placeholder="Username">
-<input id="p" type="password" hidden>
-<input id="c" type="password" hidden>
+<h2 id="title">Введите имя пользователя</h2>
+
+<input id="u" placeholder="Имя пользователя">
+<input id="p" type="password" placeholder="Пароль" hidden>
+<input id="c" type="password" placeholder="Повторите пароль" hidden>
+
 <div id="error"></div>
-<button onclick="next()">Continue</button>
+
+<button onclick="next()">Продолжить</button>
 </div>
 
 <script src="app.js"></script>
