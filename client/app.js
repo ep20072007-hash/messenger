@@ -1,3 +1,4 @@
+console.log("APP LOADED");
 const socket=io();
 
 const usersDiv=document.getElementById("users");
