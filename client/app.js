@@ -1,5 +1,4 @@
 const auth=document.getElementById("auth");
-const app=document.getElementById("app");
 const title=document.getElementById("title");
 const error=document.getElementById("error");
 
@@ -21,13 +20,30 @@ if(token){
 }
 
 function showProfile(profile){
+
  document.body.innerHTML=`
-  <div style="background:#0e1621;color:white;height:100vh;padding:40px">
-   <h2>${profile.username}</h2>
-   <p>${profile.bio||"No bio"}</p>
-   <button onclick="logout()">Logout</button>
-  </div>
+ <div style="background:#0e1621;color:white;height:100vh;padding:20px">
+
+ <h2>${profile.username}</h2>
+
+ <input id="search" placeholder="Find users">
+ <button onclick="find()">Search</button>
+
+ <h3>Results</h3>
+ <div id="results"></div>
+
+ <h3>Friend requests</h3>
+ <div id="requests"></div>
+
+ <h3>Friends</h3>
+ <div id="friends"></div>
+
+ <button onclick="logout()">Logout</button>
+
+ </div>
  `;
+
+ loadFriends(profile.username);
 }
 
 function logout(){
@@ -45,7 +61,6 @@ async function next(){
 
   exists=d.exists;
   title.innerText=exists?"Enter password":"Create password";
-
   p.hidden=false;
   if(!exists)c.hidden=false;
 
@@ -58,21 +73,50 @@ async function next(){
   return;
  }
 
- const endpoint=exists?"/auth/login":"/auth/register";
+ const url=exists?"/auth/login":"/auth/register";
 
- const r=await fetch(endpoint,{
-  method:"POST",
-  headers:{"Content-Type":"application/json"},
-  body:JSON.stringify({username:u.value,password:p.value})
- });
-
+ const r=await fetch(url,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({username:u.value,password:p.value})});
  const d=await r.json();
 
- if(d.error){
-  error.innerText=d.error;
-  return;
- }
+ if(d.error){error.innerText=d.error;return;}
 
  localStorage.setItem("token",d.token);
  showProfile(d.profile);
+}
+
+// FRIENDS
+
+async function find(){
+ const v=document.getElementById("search").value;
+ const r=await fetch("/search/"+v);
+ const d=await r.json();
+
+ const res=document.getElementById("results");
+ res.innerHTML="";
+ d.forEach(x=>{
+  res.innerHTML+=`${x.username} <button onclick="addFriend('${x.username}')">Add</button><br>`;
+ });
+}
+
+async function addFriend(user){
+ await fetch("/friend/request",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({from:u.value,to:user})});
+}
+
+async function loadFriends(me){
+ const r=await fetch("/friends/"+me);
+ const d=await r.json();
+
+ const f=document.getElementById("friends");
+ const req=document.getElementById("requests");
+
+ f.innerHTML="";
+ req.innerHTML="";
+
+ d.friends.forEach(x=>f.innerHTML+=x+"<br>");
+ d.requests.forEach(x=>req.innerHTML+=`${x} <button onclick="accept('${x}')">Accept</button><br>`);
+}
+
+async function accept(user){
+ await fetch("/friend/accept",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({me:u.value,user})});
+ loadFriends(u.value);
 }
