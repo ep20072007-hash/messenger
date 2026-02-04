@@ -22,9 +22,6 @@ mongoose.connect(
  "mongodb+srv://ep20072007_db_user:123321qaz_@cluster0.xxu1dyy.mongodb.net/?appName=Cluster0"
 );
 
-  
-  }
-);
 
 
 // ===== MODELS =====
