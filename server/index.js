@@ -1,36 +1,41 @@
 const express = require("express");
 const http = require("http");
-const { Server } = require("socket.io");
-const mongoose = require("mongoose");
 const cors = require("cors");
+const mongoose = require("mongoose");
 const path = require("path");
+const { Server } = require("socket.io");
 
 const app = express();
 const server = http.createServer(app);
+
 const io = new Server(server, {
-  cors: { origin: "*" }
+  cors: {
+    origin: "*",
+  },
 });
 
 app.use(cors());
 app.use(express.json());
 
-// 👉 подключаем папку client
+// client folder
 app.use(express.static(path.join(__dirname, "../client")));
 
-// 👉 MongoDB
-mongoose.connect(
- "mongodb+srv://ep20072007_db_user:123321qaz_@cluster0.xxu1dyy.mongodb.net/?appName=Cluster0"
-);
+// ================= MONGODB =================
 
+mongoose
+  .connect(
+    "mongodb+srv://ep20072007_db_user:123321qaz_@cluster0.xxu1dyy.mongodb.net/messenger?retryWrites=true&w=majority"
+  )
+  .then(() => console.log("MongoDB connected"))
+  .catch((err) => console.log("Mongo error:", err));
 
-
-// ===== MODELS =====
+// ================= MODELS =================
 
 const User = mongoose.model(
   "User",
   new mongoose.Schema({
     username: String,
-    password: String
+    password: String,
   })
 );
 
@@ -40,17 +45,17 @@ const Message = mongoose.model(
     chatId: String,
     from: String,
     to: String,
-    text: String
+    text: String,
   })
 );
 
-// ===== ROUTES =====
+// ================= ROUTES =================
 
 // login
 app.post("/login", async (req, res) => {
-  let u = await User.findOne(req.body);
-  if (!u) u = await User.create(req.body);
-  res.json(u);
+  let user = await User.findOne(req.body);
+  if (!user) user = await User.create(req.body);
+  res.json(user);
 });
 
 // users
@@ -63,19 +68,19 @@ app.get("/messages/:chatId", async (req, res) => {
   res.json(await Message.find({ chatId: req.params.chatId }));
 });
 
-// ===== SOCKET =====
+// ================= SOCKET =================
 
-io.on("connection", socket => {
-  socket.on("send", async m => {
-    m.chatId = [m.from, m.to].sort().join("-");
-    await Message.create(m);
-    io.emit(m.chatId, m);
+io.on("connection", (socket) => {
+  socket.on("send", async (msg) => {
+    msg.chatId = [msg.from, msg.to].sort().join("-");
+    await Message.create(msg);
+    io.emit(msg.chatId, msg);
   });
 });
 
-// ===== START SERVER =====
+// ================= START =================
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 10000;
 
 server.listen(PORT, "0.0.0.0", () => {
   console.log("SERVER STARTED ON", PORT);
