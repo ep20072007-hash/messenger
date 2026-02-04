@@ -1,6 +1,6 @@
 body{
 margin:0;
-background:#0b1218;
+background:#0f1115;
 color:white;
 font-family:Arial;
 }
@@ -13,20 +13,24 @@ border-radius:6px;
 
 button{background:#2b5278;color:white}
 
-#auth{
+#login{
 width:300px;
-margin:120px auto;
+margin:150px auto;
 display:flex;
 flex-direction:column;
 gap:10px;
 }
 
-.panel{display:flex;height:100vh}
+#app{
+display:flex;
+height:100vh;
+}
 
-.left{
-width:260px;
-background:#17212b;
+.sidebar{
+width:280px;
+background:#181c24;
 padding:10px;
+overflow:auto;
 }
 
 .chat{
@@ -35,20 +39,24 @@ display:flex;
 flex-direction:column;
 }
 
-.user{padding:6px;border-bottom:1px solid #222;cursor:pointer}
-
-.messages{
+#messages{
 flex:1;
 padding:15px;
 overflow:auto;
 }
 
-.msg{margin:6px 0}
+.msg{margin:6px}
 .me{text-align:right}
 
 .send{
 display:flex;
 gap:5px;
 padding:10px;
-background:#17212b;
+background:#181c24;
+}
+
+.user{
+padding:6px;
+border-bottom:1px solid #222;
+cursor:pointer;
 }

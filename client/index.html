@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
 <meta charset="UTF-8">
 <title>Messenger</title>
@@ -8,16 +8,37 @@
 
 <body>
 
-<div id="auth">
-<h2 id="title">Введите имя</h2>
+<div id="login">
+<h2>Вход</h2>
+<input id="user" placeholder="Имя">
+<input id="pass" type="password" placeholder="Пароль">
+<button onclick="login()">Войти</button>
+<button onclick="register()">Регистрация</button>
+<div id="err"></div>
+</div>
 
-<input id="u" placeholder="Имя">
-<input id="p" type="password" placeholder="Пароль" hidden>
-<input id="c" type="password" placeholder="Повторите пароль" hidden>
+<div id="app" hidden>
 
-<div id="error"></div>
+<div class="sidebar">
+<h3 id="me"></h3>
+<input id="search" placeholder="Поиск">
+<div id="results"></div>
 
-<button onclick="next()">Продолжить</button>
+<h4>Друзья</h4>
+<div id="friends"></div>
+
+<h4>Заявки</h4>
+<div id="requests"></div>
+</div>
+
+<div class="chat">
+<div id="messages"></div>
+<div class="send">
+<input id="text">
+<button onclick="send()">➤</button>
+</div>
+</div>
+
 </div>
 
 <script src="/socket.io/socket.io.js"></script>
