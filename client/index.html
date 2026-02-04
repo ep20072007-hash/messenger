@@ -9,20 +9,27 @@
 <body>
 
 <div id="auth">
-
 <h2 id="title">Enter username</h2>
-
 <input id="u" placeholder="Username">
-<input id="p" type="password" placeholder="Password" hidden>
-<input id="c" type="password" placeholder="Confirm password" hidden>
-
+<input id="p" type="password" hidden>
+<input id="c" type="password" hidden>
 <div id="error"></div>
-
 <button onclick="next()">Continue</button>
-
 </div>
 
-<script src="app.js"></script>
+<div id="app" hidden>
+<div id="users"></div>
 
+<div id="chat">
+<div id="messages"></div>
+<div id="send">
+<input id="text" placeholder="Message">
+<button onclick="send()">➤</button>
+</div>
+</div>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="app.js"></script>
 </body>
 </html>
