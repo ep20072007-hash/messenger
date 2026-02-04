@@ -1,3 +1,6 @@
+mongoose.connect(process.env.MONGO_URL)
+.then(()=>console.log("Mongo connected"))
+.catch(e=>console.error("Mongo error",e));
 const express=require("express");
 const mongoose=require("mongoose");
 const bcrypt=require("bcrypt");
@@ -74,6 +77,8 @@ io.on("connection",socket=>{
  socket.on("send",async m=>{
   m.chat=[m.from,m.to].sort().join("_");
   await Message.create(m);
+process.on("uncaughtException",e=>console.error(e));
+process.on("unhandledRejection",e=>console.error(e));
   io.emit("message",m);
  });
 
@@ -81,3 +86,6 @@ io.on("connection",socket=>{
 
 const PORT=process.env.PORT||10000;
 server.listen(PORT,()=>console.log("SERVER",PORT));
+process.on("uncaughtException",e=>console.error(e));
+process.on("unhandledRejection",e=>console.error(e));
+
