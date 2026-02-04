@@ -9,23 +9,20 @@
 
 <div id="login">
 <input id="u" placeholder="Username">
-<input id="p" placeholder="Password">
+<input id="p" type="password" placeholder="Password">
 <button onclick="login()">Login</button>
 <button onclick="reg()">Register</button>
 </div>
 
 <div id="app" hidden>
-
 <div id="users"></div>
-
 <div id="chat">
 <div id="messages"></div>
 <div id="send">
-<input id="text">
+<input id="text" placeholder="Message...">
 <button onclick="send()">➤</button>
 </div>
 </div>
-
 </div>
 
 <script src="/socket.io/socket.io.js"></script>

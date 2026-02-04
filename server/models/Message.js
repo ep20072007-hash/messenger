@@ -1,10 +1,9 @@
-const mongoose = require("mongoose");
+const mongoose=require("mongoose");
 
-const MessageSchema = new mongoose.Schema({
-  from: String,
-  to: String,
-  text: String,
-  created: { type: Date, default: Date.now }
-});
-
-module.exports = mongoose.model("Message", MessageSchema);
+module.exports=mongoose.model("Message",new mongoose.Schema({
+  chat:String,
+  from:String,
+  to:String,
+  text:String,
+  time:{type:Date,default:Date.now}
+}));
