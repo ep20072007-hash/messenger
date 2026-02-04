@@ -1,10 +1,9 @@
+require("dotenv").config();
 const express=require("express");
 const mongoose=require("mongoose");
 const bcrypt=require("bcrypt");
 const jwt=require("jsonwebtoken");
 const cors=require("cors");
-const http=require("http");
-const {Server}=require("socket.io");
 const path=require("path");
 
 const User=require("./models/User");
@@ -12,59 +11,64 @@ const User=require("./models/User");
 mongoose.connect(process.env.MONGO_URL);
 
 const app=express();
-const server=http.createServer(app);
-const io=new Server(server);
 
 app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname,"../client")));
 
-const SECRET="super_secret_key";
+const SECRET="telegram_clone_secret";
 
-function auth(req,res,next){
- const h=req.headers.authorization;
- if(!h) return res.sendStatus(401);
- try{
-  req.user=jwt.verify(h.split(" ")[1],SECRET);
-  next();
- }catch{
-  res.sendStatus(401);
- }
+function token(user){
+ return jwt.sign({id:user._id,username:user.username},SECRET,{expiresIn:"7d"});
 }
 
-app.post("/auth/start",async(req,res)=>{
+app.post("/auth/check",async(req,res)=>{
+ const {username}=req.body;
+ const u=await User.findOne({username});
+ res.json({exists:!!u});
+});
+
+app.post("/auth/register",async(req,res)=>{
  const {username,password}=req.body;
 
- let u=await User.findOne({username});
+ if(password.length<4)
+  return res.json({error:"Password too short"});
 
- if(!u){
-  const hash=await bcrypt.hash(password,12);
-  u=await User.create({
-   username,
-   password:hash,
-   lastLogin:new Date()
-  });
+ if(await User.findOne({username}))
+  return res.json({error:"User exists"});
 
-  const token=jwt.sign({id:u._id,username},SECRET,{expiresIn:"7d"});
-  return res.json({status:"new",token,username});
- }
+ const hash=await bcrypt.hash(password,12);
+
+ const u=await User.create({username,password:hash});
+
+ res.json({token:token(u),username});
+});
+
+app.post("/auth/login",async(req,res)=>{
+ const {username,password}=req.body;
+
+ const u=await User.findOne({username});
+ if(!u) return res.json({error:"User not found"});
 
  if(!await bcrypt.compare(password,u.password))
-  return res.json({status:"bad"});
+  return res.json({error:"Wrong password"});
 
  u.lastLogin=new Date();
  await u.save();
 
- const token=jwt.sign({id:u._id,username},SECRET,{expiresIn:"7d"});
-
- res.json({status:"ok",token,username});
+ res.json({token:token(u),username});
 });
 
-app.get("/me",auth,(req,res)=>{
- res.json(req.user);
+app.get("/auth/me",async(req,res)=>{
+ try{
+  const h=req.headers.authorization;
+  if(!h) throw 0;
+  const d=jwt.verify(h.split(" ")[1],SECRET);
+  res.json(d);
+ }catch{
+  res.sendStatus(401);
+ }
 });
-
-io.on("connection",socket=>{});
 
 const PORT=process.env.PORT||10000;
-server.listen(PORT,()=>console.log("SERVER",PORT));
+app.listen(PORT,()=>console.log("SERVER",PORT));

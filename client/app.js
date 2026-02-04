@@ -1,40 +1,57 @@
-let token=localStorage.getItem("token");
-let me=localStorage.getItem("username");
+const title=document.getElementById("title");
+const error=document.getElementById("error");
+
+let stage=0;
+let exists=false;
+
+const token=localStorage.getItem("token");
 
 if(token){
- fetch("/me",{headers:{Authorization:"Bearer "+token}})
+ fetch("/auth/me",{headers:{Authorization:"Bearer "+token}})
  .then(r=>{
-  if(r.ok){
-   alert("Auto login as "+me);
-  }else{
-   localStorage.clear();
-  }
+  if(r.ok) location.reload();
  });
 }
 
-async function auth(){
+async function next(){
 
- const r=await fetch("/auth/start",{
-  method:"POST",
-  headers:{"Content-Type":"application/json"},
-  body:JSON.stringify({
-   username:u.value,
-   password:p.value
-  })
- });
+ error.innerText="";
 
- const d=await r.json();
+ if(stage===0){
+  const r=await fetch("/auth/check",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({username:u.value})});
+  const d=await r.json();
+  exists=d.exists;
 
- if(d.status==="bad"){
-  alert("Wrong password");
+  title.innerText=exists?"Enter password":"Create password";
+  p.hidden=false;
+  if(!exists) c.hidden=false;
+  stage=1;
   return;
  }
 
- token=d.token;
- me=d.username;
+ if(stage===1){
 
- localStorage.setItem("token",token);
- localStorage.setItem("username",me);
+  if(!exists && p.value!==c.value){
+   error.innerText="Passwords do not match";
+   return;
+  }
 
- alert("Logged in as "+me);
+  const url=exists?"/auth/login":"/auth/register";
+
+  const r=await fetch(url,{
+   method:"POST",
+   headers:{"Content-Type":"application/json"},
+   body:JSON.stringify({username:u.value,password:p.value})
+  });
+
+  const d=await r.json();
+
+  if(d.error){
+   error.innerText=d.error;
+   return;
+  }
+
+  localStorage.setItem("token",d.token);
+  location.reload();
+ }
 }
