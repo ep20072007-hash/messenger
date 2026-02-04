@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<input id="u" placeholder="login">
+<input id="p" placeholder="password" type="password">
+<button onclick="go()">Enter</button>
+
+<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+
+<script>
+async function go(){
+  const r = await fetch("/login",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({
+      username:u.value,
+      password:p.value
+    })
+  });
+
+  const d = await r.json();
+  localStorage.user = d.username;
+  location = "users.html";
+}
+</script>
+
+</body>
+</html>
