@@ -19,10 +19,10 @@ app.use(express.static(path.join(__dirname, "../client")));
 
 // 👉 MongoDB
 mongoose.connect(
-  "mongodb+srv://ep20072007_db_user:123321qaz_@cluster0.xxuldyy.mongodb.net/?appName=Cluster0",
-  {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
+ "mongodb+srv://ep20072007_db_user:123321qaz_@cluster0.xxu1dyy.mongodb.net/?appName=Cluster0"
+);
+
+  
   }
 );
 
