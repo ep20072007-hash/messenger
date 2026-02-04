@@ -1,8 +1,16 @@
 body{
 margin:0;
-background:#0f1115;
+background:#0e0f13;
 color:white;
 font-family:Arial;
+}
+
+#login{
+width:300px;
+margin:150px auto;
+display:flex;
+flex-direction:column;
+gap:10px;
 }
 
 input,button{
@@ -13,30 +21,33 @@ border-radius:6px;
 
 button{background:#2b5278;color:white}
 
-#login{
-width:300px;
-margin:150px auto;
-display:flex;
-flex-direction:column;
-gap:10px;
-}
-
-#app{
+.vk{
 display:flex;
 height:100vh;
 }
 
-.sidebar{
-width:280px;
-background:#181c24;
+.left{
+width:260px;
+background:#181b22;
 padding:10px;
 overflow:auto;
 }
 
-.chat{
+.profile{
+font-weight:bold;
+margin-bottom:10px;
+}
+
+.center{
 flex:1;
 display:flex;
 flex-direction:column;
+}
+
+.chat-header{
+padding:12px;
+background:#1c1f26;
+border-bottom:1px solid #222;
 }
 
 #messages{
@@ -45,14 +56,17 @@ padding:15px;
 overflow:auto;
 }
 
-.msg{margin:6px}
+.msg{
+margin:6px 0;
+}
+
 .me{text-align:right}
 
 .send{
 display:flex;
 gap:5px;
 padding:10px;
-background:#181c24;
+background:#181b22;
 }
 
 .user{

@@ -51,7 +51,7 @@ async function loadFriends(){
  d.requests.forEach(u=>{
   const div=document.createElement("div");
   div.className="user";
-  div.innerText=u+" ✓";
+  div.innerText="✓ "+u;
   div.onclick=()=>accept(u);
   requests.appendChild(div);
  });
@@ -64,6 +64,8 @@ async function accept(u){
 
 search.oninput=async()=>{
 
+ if(!search.value)return results.innerHTML="";
+
  const r=await fetch("/search/"+search.value);
  const d=await r.json();
 
@@ -72,7 +74,7 @@ search.oninput=async()=>{
  d.forEach(u=>{
   const div=document.createElement("div");
   div.className="user";
-  div.innerText=u.username+" +";
+  div.innerText="+ "+u.username;
   div.onclick=()=>add(u.username);
   results.appendChild(div);
  });
@@ -85,6 +87,7 @@ async function add(u){
 async function openChat(u){
 
  current=u;
+ chatName.innerText=u;
 
  const r=await fetch("/messages/"+me+"/"+u);
  const d=await r.json();
@@ -97,6 +100,8 @@ async function openChat(u){
 }
 
 function send(){
+
+ if(!current)return;
 
  socket.emit("send",{from:me,to:current,text:text.value});
  text.value="";
